@@ -21,7 +21,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-default['mysql']['server_root_password'] = 'qwaszx@1'
+
 # General settings
 default['wordpress']['version'] = 'latest'
 default['wordpress']['server_aliases'] = '10.6.206.229'
@@ -32,9 +32,9 @@ default['wordpress']['db']['user'] = "wp_user"
 default['wordpress']['db']['pass'] = "qwaszx@1"
 default['wordpress']['db']['prefix'] = 'wp_'
 default['wordpress']['db']['host'] = '127.0.0.1'
+default['mysql']['server_root_password'] = 'qwaszx@1'
 
 default['wordpress']['server_aliases'] = ['local']
-default['wordpress']['db']['theme_db'] = ['template', 'stylesheet', 'current_theme'] 
 default['wordpress']['db']['theme'] = 'twentyfifteen'
 
 # Languages
@@ -69,4 +69,3 @@ else
   default['wordpress']['dir'] = "#{node['wordpress']['parent_dir']}/wordpress"
   default['wordpress']['url'] = "https://wordpress.org/wordpress-#{node['wordpress']['version']}.tar.gz"
 end
-
