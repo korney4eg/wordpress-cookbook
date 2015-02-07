@@ -17,7 +17,10 @@
 # limitations under the License.
 #
 
+theme = node['wordpress']['db']['theme']
+
 include_recipe "php"
+include_recipe "wordpress-cookbook::database_test"
 
 # On Windows PHP comes with the MySQL Module and we use IIS on Windows
 unless platform? "windows"
@@ -26,7 +29,7 @@ unless platform? "windows"
   include_recipe "apache2::mod_php5"
 end
 
-include_recipe "wordpress-cookbook::database"
+include_recipe 'wp-cli'
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 node.set_unless['wordpress']['keys']['auth'] = secure_password
@@ -62,6 +65,7 @@ else
   remote_file "#{Chef::Config[:file_cache_path]}/#{archive}" do
     source node['wordpress']['url']
     action :create
+    not_if {::File.exists?("#{node['wordpress']['dir']}/index.php")}
   end
 
   execute "extract-wordpress" do
@@ -114,4 +118,24 @@ else
     server_aliases node['wordpress']['server_aliases']
     enable true
   end
+end
+
+
+wp_cli_command 'core install' do
+  args(
+     'path' => '/var/www/wordpress',
+     'allow-root' => '',
+     'url' => 'http://10.6.207.159',
+     'title' => 'Test-Site',
+     'admin_name' => 'admin',
+     'admin_email' => 'email@mail.mail',
+     'admin_password' => 'qwaszx@1'
+      )
+end
+
+wp_cli_command "theme activate #{theme}" do
+  args(
+  'path' => '/var/www/wordpress',
+  'allow-root' => ''
+  )
 end
