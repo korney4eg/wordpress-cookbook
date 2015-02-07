@@ -26,7 +26,7 @@ unless platform? "windows"
   include_recipe "apache2::mod_php5"
 end
 
-include_recipe "wordpress::database"
+include_recipe "wordpress-cookbook::database"
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 node.set_unless['wordpress']['keys']['auth'] = secure_password
@@ -110,7 +110,7 @@ else
   web_app "wordpress" do
     template "wordpress.conf.erb"
     docroot node['wordpress']['dir']
-    server_name node['fqdn']
+    server_name 'local:80'
     server_aliases node['wordpress']['server_aliases']
     enable true
   end

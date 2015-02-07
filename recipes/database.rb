@@ -24,10 +24,13 @@ include_recipe "mysql::client" unless platform_family?('windows') # No MySQL cli
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 ::Chef::Recipe.send(:include, Wordpress::Helpers)
 
-node.set_unless['wordpress']['db']['pass'] = secure_password
+#node.set_unless['wordpress']['db']['pass'] = secure_password
+node.set['wordpress']['db']['pass'] = secure_password unless node['wordpress']['db']['pass']
+
 node.save unless Chef::Config[:solo]
 
 db = node['wordpress']['db']
+db_option_name = ['template', 'stylesheet', 'current_theme']
 
 if is_local_host? db['host']
   include_recipe "mysql::server"
@@ -41,6 +44,8 @@ if is_local_host? db['host']
   grant_privileges = %<GRANT ALL PRIVILEGES ON #{db['name']}.* TO #{user};>
   privileges_exist = %<SHOW GRANTS FOR for #{user}@'%';>
   flush_privileges = %<FLUSH PRIVILEGES;>
+  
+
 
   execute "Create WordPress MySQL User" do
     action :run
@@ -66,3 +71,28 @@ if is_local_host? db['host']
     only_if { `#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], db_exists)}`.empty? }
   end
 end
+
+mysql2_chef_gem 'default' do
+  action :install
+end
+
+files = node['wordpress']['db']['theme_db']
+theme = node['wordpress']['db']['theme']
+
+mysql_connection_info = {
+  :host     => '10.6.206.229',
+  :username => 'root',
+  :password => 'qwaszx@1',
+  :database => 'wp'
+}
+
+Chef::Log.warn("*** Changing Wordpress theme to Twenty Fifteen ***")
+
+files.each do |file|
+  mysql_database 'wp' do
+  connection mysql_connection_info
+  sql "UPDATE wp_options SET option_value = \'#{theme}\' WHERE option_name = \'#{file}\';"
+  action :query
+  end
+end
+
