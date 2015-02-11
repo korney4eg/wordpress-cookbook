@@ -24,6 +24,7 @@
 
 # General settings
 default['wordpress']['version'] = 'latest'
+default['mysql']['server_root_password']='oasis'
 
 default['wordpress']['db']['name'] = "wordpressdb"
 default['wordpress']['db']['user'] = "wordpressuser"

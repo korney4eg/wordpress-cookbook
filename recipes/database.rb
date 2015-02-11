@@ -19,7 +19,22 @@
 # limitations under the License.
 #
 
-include_recipe "mysql::client" unless platform_family?('windows') # No MySQL client on Windows
+#include_recipe "mysql::client" unless platform_family?('windows') # No MySQL client on Windows
+if(!platform_family?('windows'))
+
+  mysql_client 'default' do
+    action :create
+  end
+  
+end
+
+mysql_service 'default' do
+  port '3306'
+  version '5.5'
+  initial_root_password node['mysql']['server_root_password']
+  action [:create, :start]
+end
+
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 ::Chef::Recipe.send(:include, Wordpress::Helpers)
