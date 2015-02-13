@@ -20,16 +20,18 @@
 #
 
 #include_recipe "mysql::client" unless platform_family?('windows') # No MySQL client on Windows
-if(!platform_family?('windows'))
 
   mysql_client 'default' do
     action :create
   end
   
-end
+
 
 mysql_service 'default' do
+  
+  bind_address '192.168.56.104'
   port '3306'
+  data_dir="/data"
   version '5.5'
   initial_root_password node['mysql']['server_root_password']
   action [:create, :start]
@@ -44,8 +46,8 @@ node.save unless Chef::Config[:solo]
 
 db = node['wordpress']['db']
 
-if is_local_host? db['host']
-  include_recipe "mysql::server"
+#if is_local_host? db['host']
+  # include_recipe "mysql::server"
 
   mysql_bin = (platform_family? 'windows') ? 'mysql.exe' : 'mysql'
   user = "'#{db['user']}'@'#{db['host']}'"
@@ -66,6 +68,8 @@ if is_local_host? db['host']
   execute "Grant WordPress MySQL Privileges" do
     action :run
     command "#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], grant_privileges)}"
+    Chef::Log.info("*****Running MySQL command: *****")
+    Chef::Log.info("#{command}")
     only_if { `#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], privileges_exist)}`.empty? }
     notifies :run, "execute[Flush MySQL Privileges]"
   end
@@ -80,4 +84,4 @@ if is_local_host? db['host']
     command "#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], create_db)}"
     only_if { `#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], db_exists)}`.empty? }
   end
-end
+#end

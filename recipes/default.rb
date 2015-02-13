@@ -17,16 +17,22 @@
 # limitations under the License.
 #
 
+execute "security setup" do
+    command "setenforce permissive && iptables -F"    
+end
+
+
 include_recipe "php"
 
 # On Windows PHP comes with the MySQL Module and we use IIS on Windows
-unless platform? "windows"
-  include_recipe "php::module_mysql"
-  include_recipe "apache2"
-  include_recipe "apache2::mod_php5"
-end
+
+include_recipe "php::module_mysql"
+include_recipe "apache2"
+include_recipe "apache2::mod_php5"
+
 
 include_recipe "wordpress::database"
+
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 node.set_unless['wordpress']['keys']['auth'] = secure_password
@@ -62,11 +68,13 @@ else
   remote_file "#{Chef::Config[:file_cache_path]}/#{archive}" do
     source node['wordpress']['url']
     action :create
+    not_if {::File.exists?("#{node['wordpress']['dir']}/index.php")}
   end
 
   execute "extract-wordpress" do
     command "tar xf #{Chef::Config[:file_cache_path]}/#{archive} -C #{node['wordpress']['parent_dir']}"
     creates "#{node['wordpress']['dir']}/index.php"
+    not_if {::File.exists?("#{node['wordpress']['dir']}/index.php")}
   end
 end
 
@@ -110,8 +118,20 @@ else
   web_app "wordpress" do
     template "wordpress.conf.erb"
     docroot node['wordpress']['dir']
-    server_name node['fqdn']
+    server_name 'slave.test.com'
     server_aliases node['wordpress']['server_aliases']
     enable true
   end
 end
+
+
+
+ include_recipe "wordpress::wp_cli"
+
+
+
+
+
+
+
+

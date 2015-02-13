@@ -4,10 +4,10 @@
   DocumentRoot <%= @params[:docroot] %>
 
   <Directory <%= @params[:docroot] %>>
-    Options FollowSymLinks
+    Options Indexes FollowSymLinks MultiViews
     AllowOverride FileInfo Options
-    Order allow,deny
-    Allow from all
+    AllowOverride All
+    Require all granted
   </Directory>
 
   <Directory />
@@ -19,8 +19,8 @@
   ErrorLog <%= node['apache']['log_dir'] %>/<%= @params[:name] %>-error.log
   CustomLog <%= node['apache']['log_dir'] %>/<%= @params[:name] %>-access.log combined
 
-  RewriteEngine On
-  RewriteLog <%= node['apache']['log_dir'] %>/<%= @application_name %>-rewrite.log
-  RewriteLogLevel 0
+#  RewriteEngine On
+#  RewriteLog <%= node['apache']['log_dir'] %>/<%= @application_name %>-rewrite.log
+#  RewriteLogLevel 0
 
 </VirtualHost>
