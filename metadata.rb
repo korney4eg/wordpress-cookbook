@@ -1,4 +1,4 @@
-name             "wordpress"
+name             "wordpress-cookbook"
 maintainer       "Barry Steinglass"
 maintainer_email "cookbooks@opscode.com"
 license          "Apache 2.0"

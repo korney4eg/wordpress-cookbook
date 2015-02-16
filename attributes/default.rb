@@ -24,7 +24,7 @@
 default['mysql']['server_root_password'] = 'qwaszx@1'
 # General settings
 default['wordpress']['version'] = 'latest'
-default['wordpress']['server_aliases'] = '10.6.206.229'
+default['wordpress']['server_aliases'] = node['fqdn']
 default['wp-cli']['dir'] = '/tmp'
 
 default['wordpress']['db']['name'] = "wp"
