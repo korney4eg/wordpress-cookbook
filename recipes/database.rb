@@ -3,6 +3,7 @@
 # Recipe:: database
 # Author:: Lucas Hansen (<lucash@opscode.com>)
 # Author:: Julian C. Dunn (<jdunn@getchef.com>)
+# Author:: Craig Tracey (<craigtracey@gmail.com>)
 #
 # Copyright (C) 2013, Chef Software, Inc.
 #
@@ -19,79 +20,59 @@
 # limitations under the License.
 #
 
-include_recipe "mysql::client" unless platform_family?('windows') # No MySQL client on Windows
 
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
-::Chef::Recipe.send(:include, Wordpress::Helpers)
+mysql_service 'server' do
+  port '3306'
+  version '5.5'
+  socket '/var/lib/mysql/mysql.sock'
+  initial_root_password 'qwaszx@1'
+  action [:create, :start]
+end
 
-#node.set_unless['wordpress']['db']['pass'] = secure_password
-node.set['wordpress']['db']['pass'] = secure_password unless node['wordpress']['db']['pass']
-
-node.save unless Chef::Config[:solo]
-
-db = node['wordpress']['db']
-db_option_name = ['template', 'stylesheet', 'current_theme']
-
-if is_local_host? db['host']
-  include_recipe "mysql::server"
-
-  mysql_bin = (platform_family? 'windows') ? 'mysql.exe' : 'mysql'
-  user = "'#{db['user']}'@'#{db['host']}'"
-  create_user = %<CREATE USER #{user} IDENTIFIED BY '#{db['pass']}';>
-  user_exists = %<SELECT 1 FROM mysql.user WHERE user = '#{db['user']}';>
-  create_db = %<CREATE DATABASE #{db['name']};>
-  db_exists = %<SHOW DATABASES LIKE '#{db['name']}';>
-  grant_privileges = %<GRANT ALL PRIVILEGES ON #{db['name']}.* TO #{user};>
-  privileges_exist = %<SHOW GRANTS FOR for #{user}@'%';>
-  flush_privileges = %<FLUSH PRIVILEGES;>
-  
-
-
-  execute "Create WordPress MySQL User" do
-    action :run
-    command "#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], create_user)}"
-    only_if { `#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], user_exists)}`.empty? }
-  end
-
-  execute "Grant WordPress MySQL Privileges" do
-    action :run
-    command "#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], grant_privileges)}"
-    only_if { `#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], privileges_exist)}`.empty? }
-    notifies :run, "execute[Flush MySQL Privileges]"
-  end
-
-  execute "Flush MySQL Privileges" do
-    action :nothing
-    command "#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], flush_privileges)}"
-  end
-
-  execute "Create WordPress Database" do
-    action :run
-    command "#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], create_db)}"
-    only_if { `#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], db_exists)}`.empty? }
-  end
+mysql_config 'server' do
+  source 'server.cnf.erb'
+  instance 'server'
+  notifies :restart, 'mysql_service[server]'
+  action :create
 end
 
 mysql2_chef_gem 'default' do
   action :install
 end
 
-#files = node['wordpress']['db']['theme_db']
-#theme = node['wordpress']['db']['theme']
+::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+::Chef::Recipe.send(:include, Wordpress::Helpers)
 
-#mysql_connection_info = {
-#  :host     => '10.6.206.229',
-#  :username => 'root',
-#  :password => 'qwaszx@1',
-#  :database => 'wp'
-#}
+node.set['wordpress']['db']['pass'] = secure_password unless node['wordpress']['db']['pass']
+node.save unless Chef::Config[:solo]
 
-#Chef::Log.warn("*** Changing Wordpress theme to Twenty Fifteen ***")
+db = node['wordpress']['db']
 
-#files.each do |file|
-#mysql_database 'wp' do
-#  connection mysql_connection_info
-#  sql "UPDATE wp_options SET option_value = \'#{theme}\' WHERE option_name = \'#{file}\';"
-#  action :query
-#  end
-#end
+if is_local_host? db['host']
+
+  mysql_connection_info = {
+    :host     => 'localhost',
+    :username => 'root',
+    :password => node['mysql']['server_root_password']
+  }
+
+  mysql_database db['name'] do
+    connection  mysql_connection_info
+    action      :create
+  end
+
+  mysql_database_user db['user'] do
+    connection    mysql_connection_info
+    password      db['pass']
+    host          db['host']
+    database_name db['name']
+    action        :create
+  end
+
+  mysql_database_user db['user'] do
+    connection    mysql_connection_info
+    database_name db['name']
+    privileges    [:all]
+    action        :grant
+  end
+end

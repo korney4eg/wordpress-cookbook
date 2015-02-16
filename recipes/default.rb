@@ -20,7 +20,7 @@
 theme = node['wordpress']['db']['theme']
 
 include_recipe "php"
-include_recipe "wordpress-cookbook::database_test"
+include_recipe "wordpress-cookbook::database"
 
 # On Windows PHP comes with the MySQL Module and we use IIS on Windows
 unless platform? "windows"
