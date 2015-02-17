@@ -29,6 +29,7 @@ include_recipe "php"
 include_recipe "php::module_mysql"
 include_recipe "apache2"
 include_recipe "apache2::mod_php5"
+include_recipe "openssl"
 
 
 include_recipe "wordpress::database"
@@ -118,7 +119,7 @@ else
   web_app "wordpress" do
     template "wordpress.conf.erb"
     docroot node['wordpress']['dir']
-    server_name 'slave.test.com'
+    server_name node['wordpress']['host_name']
     server_aliases node['wordpress']['server_aliases']
     enable true
   end

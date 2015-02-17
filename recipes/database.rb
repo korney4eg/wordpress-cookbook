@@ -25,17 +25,16 @@
     action :create
   end
   
-
-
 mysql_service 'default' do
-  
-  bind_address '192.168.56.104'
   port '3306'
-  data_dir="/data"
   version '5.5'
+  bind_address '0.0.0.0'
+  data_dir '/wordpress_data'
   initial_root_password node['mysql']['server_root_password']
+  Chef::Provider::MysqlService::Systemd
   action [:create, :start]
 end
+
 
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)

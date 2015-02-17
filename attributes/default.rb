@@ -24,13 +24,22 @@
 
 # General settings
 default['wordpress']['version'] = 'latest'
+default['wordpress']['host_name']="192.168.56.110"
 default['mysql']['server_root_password']='oasis'
+default['wordpress']['title']="test web site"
+default['wordpress']['admin_user']="wp_admin"
+default['wordpress']['admin_psw']="oasis"
+default['wordpress']['admin_email']="root@localhost.com"
+
+
+
+
 
 default['wordpress']['db']['name'] = "wordpressdb"
 default['wordpress']['db']['user'] = "wordpressuser"
 default['wordpress']['db']['pass'] = nil
 default['wordpress']['db']['prefix'] = 'wp_'
-default['wordpress']['db']['host'] = '192.168.56.104'
+default['wordpress']['db']['host'] = '127.0.0.1'
 
 default['wordpress']['server_aliases'] = [node['fqdn']]
 
@@ -57,12 +66,8 @@ node['wordpress']['languages']['project_pathes'].each do |project,project_path|
     node['wordpress']['languages']['lang'] + '/default/export-translations?format=mo'
 end
 
-if platform_family?('windows')
-  default['wordpress']['parent_dir'] = "#{ENV['SystemDrive']}\\inetpub"
-  default['wordpress']['dir'] = "#{node['wordpress']['parent_dir']}\\wordpress"
-  default['wordpress']['url'] = "https://wordpress.org/wordpress-#{node['wordpress']['version']}.zip"
-else
-  default['wordpress']['parent_dir'] = '/var/www'
-  default['wordpress']['dir'] = "#{node['wordpress']['parent_dir']}/wordpress"
-  default['wordpress']['url'] = "https://wordpress.org/wordpress-#{node['wordpress']['version']}.tar.gz"
-end
+
+default['wordpress']['parent_dir'] = '/var/www'
+default['wordpress']['dir'] = "#{node['wordpress']['parent_dir']}/wordpress"
+default['wordpress']['url'] = "https://wordpress.org/wordpress-#{node['wordpress']['version']}.tar.gz"
+
