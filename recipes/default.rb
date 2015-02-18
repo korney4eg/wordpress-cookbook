@@ -59,13 +59,7 @@ end
 
 archive = platform_family?('windows') ? 'wordpress.zip' : 'wordpress.tar.gz'
 
-if platform_family?('windows')
-  windows_zipfile node['wordpress']['parent_dir'] do
-    source node['wordpress']['url']
-    action :unzip
-    not_if {::File.exists?("#{node['wordpress']['dir']}\\index.php")}
-  end
-else
+
   remote_file "#{Chef::Config[:file_cache_path]}/#{archive}" do
     source node['wordpress']['url']
     action :create
@@ -77,7 +71,7 @@ else
     creates "#{node['wordpress']['dir']}/index.php"
     not_if {::File.exists?("#{node['wordpress']['dir']}/index.php")}
   end
-end
+
 
 template "#{node['wordpress']['dir']}/wp-config.php" do
   source 'wp-config.php.erb'
@@ -96,26 +90,12 @@ template "#{node['wordpress']['dir']}/wp-config.php" do
     :nonce_salt       => node['wordpress']['salt']['nonce'],
     :lang             => node['wordpress']['languages']['lang']
   )
+  
   action :create
+  not_if {File.exists?("#{node['wordpress']['dir']}/wp-config.php")}
 end
 
-if platform?('windows')
 
-  include_recipe 'iis::remove_default_site'
-
-  iis_pool 'WordpressPool' do
-    no_managed_code true
-    action :add
-  end
-
-  iis_site 'Wordpress' do
-    protocol :http
-    port 80
-    path node['wordpress']['dir']
-    application_pool 'WordpressPool'
-    action [:add,:start]
-  end
-else
   web_app "wordpress" do
     template "wordpress.conf.erb"
     docroot node['wordpress']['dir']
@@ -123,7 +103,7 @@ else
     server_aliases node['wordpress']['server_aliases']
     enable true
   end
-end
+
 
 
 

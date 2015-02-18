@@ -30,14 +30,14 @@ default['wordpress']['title']="test web site"
 default['wordpress']['admin_user']="wp_admin"
 default['wordpress']['admin_psw']="oasis"
 default['wordpress']['admin_email']="root@localhost.com"
-
-
+default['wordpress']['wp-cli_path']="/usr/local/bin/wp"
+default['wordpress']['wp-cli_url']="https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar"
 
 
 
 default['wordpress']['db']['name'] = "wordpressdb"
 default['wordpress']['db']['user'] = "wordpressuser"
-default['wordpress']['db']['pass'] = nil
+default['wordpress']['db']['pass'] = "oasis2"
 default['wordpress']['db']['prefix'] = 'wp_'
 default['wordpress']['db']['host'] = '127.0.0.1'
 
