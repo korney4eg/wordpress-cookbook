@@ -20,7 +20,6 @@ depends "iis", ">= 1.6.2"
 depends "database"
 depends "mysql2_chef_gem"
 depends "wp-cli"
-depends "openssl"
 
 %w{ debian ubuntu windows centos redhat scientific oracle }.each do |os|
   supports os
