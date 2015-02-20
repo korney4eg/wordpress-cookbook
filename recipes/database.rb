@@ -40,7 +40,7 @@ mysql2_chef_gem 'default' do
   action :install
 end
 
-::Chef::Recipe.send(:include, Opscode::OpenSSLCookbook::Password)
+::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 ::Chef::Recipe.send(:include, Wordpress::Helpers)
 
 node.set['wordpress']['db']['pass'] = secure_password unless node['wordpress']['db']['pass']
