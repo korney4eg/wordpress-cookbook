@@ -18,7 +18,7 @@ depends "database"
 depends "mysql2_chef_gem"
 depends "wp-cli"
 depends "php"
-depends "openssl", ">=4.0.0"
+depends "openssl", ">= 4.0.0"
 
 %w{ debian ubuntu windows centos redhat scientific oracle }.each do |os|
   supports os
