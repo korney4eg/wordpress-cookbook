@@ -125,7 +125,7 @@ wp_cli_command 'core install' do
   args(
      'path' => '/var/www/wordpress',
      'allow-root' => '',
-     'url' => node['ipaddress'],
+     'url' => node['wordpress']['ip'],
      'title' => 'Test-Site',
      'admin_name' => 'admin',
      'admin_email' => 'email@mail.mail',
