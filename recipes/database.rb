@@ -64,7 +64,7 @@ if is_local_host? db['host']
   mysql_database_user db['user'] do
     connection    mysql_connection_info
     password      db['pass']
-    host          db['host']
+    host          db['server']
     database_name db['name']
     action        :create
   end
