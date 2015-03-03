@@ -80,7 +80,7 @@ template "#{node['wordpress']['dir']}/wp-config.php" do
     :db_name          => node['wordpress']['db']['name'],
     :db_user          => node['wordpress']['db']['user'],
     :db_password      => node['wordpress']['db']['pass'],
-    :db_host          => node['wordpress']['db']['host'],
+    :db_server          => node['wordpress']['db']['server'],
     :auth_key         => node['wordpress']['keys']['auth'],
     :secure_auth_key  => node['wordpress']['keys']['secure_auth'],
     :logged_in_key    => node['wordpress']['keys']['logged_in'],

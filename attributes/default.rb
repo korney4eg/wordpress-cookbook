@@ -34,6 +34,7 @@ default['wordpress']['db']['prefix'] = 'wp_'
 default['wordpress']['db']['host'] = '127.0.0.1'
 default['mysql']['server_root_password'] = 'qwaszx@1'
 
+default['wordpress']['db']['server'] = '127.0.0.1'
 default['wordpress']['ip'] = '127.0.0.1'
 default['wordpress']['server_aliases'] = ['local']
 default['wordpress']['db']['theme'] = 'twentyfifteen'
