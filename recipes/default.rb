@@ -17,9 +17,9 @@
 # limitations under the License.
 #
 
-execute "security setup" do
-    command "setenforce permissive && iptables -F"    
-end
+# install setroubleshoot
+
+
 
 
 include_recipe "php"
@@ -29,10 +29,22 @@ include_recipe "php"
 include_recipe "php::module_mysql"
 include_recipe "apache2"
 include_recipe "apache2::mod_php5"
+include_recipe "apache2::mod_ssl"
 include_recipe "openssl"
-
-
 include_recipe "wordpress::database"
+include_recipe "wordpress::wp_cli"
+include_recipe "wordpress::hosts"
+include_recipe "wordpress::security"
+include_recipe "wordpress::host_info"
+include_recipe "wordpressnfs"
+
+Chef::Log.warn("*****Warning!!! SElinux will be disabled during setup *****")
+
+execute "selinux disable" do
+    command "setenforce permissive"    
+end
+
+
 
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
@@ -106,8 +118,24 @@ end
 
 
 
+  execute "wp-cli" do
+      command "wp core install --allow-root && wp theme activate twentyfifteen --allow-root"
+      cwd node['wordpress']['parent_dir']
+  end
 
- include_recipe "wordpress::wp_cli"
+  execute "wp-content permissions" do
+      command "chmod 777 wp-content -R"
+      cwd node['wordpress']['dir']
+  end
+
+  execute "restart httpd" do
+      command "systemctl restart httpd"
+  end
+
+
+
+
+ 
 
 
 

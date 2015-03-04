@@ -25,11 +25,7 @@ if (!File.exists?(node['wordpress']['wp-cli_path']))
       path node['wordpress']['wp-cli_path']
   end  
   
-  Chef::Log.info("Running command: wp core install --allow-root && wp theme activate twentyfifteen --allow-root using #{node['wordpress']['parent_dir']}")
-  execute "wp-cli" do
-      command "wp core install --allow-root && wp theme activate twentyfifteen --allow-root"
-      cwd node['wordpress']['parent_dir']
-  end
+#  Chef::Log.info("Running command: wp core install --allow-root && wp theme activate twentyfifteen --allow-root using #{node['wordpress']['parent_dir']}")
   
 end
 

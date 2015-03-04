@@ -19,7 +19,7 @@
 # limitations under the License.
 #
 
-module Wordpress
+module Separatedb
   module Helpers
     def is_local_host?(host)
       if host == 'localhost' || host == '127.0.0.1' || host == '::1'
@@ -31,8 +31,9 @@ module Wordpress
       end
     end
 
-    def self.make_db_query(user, pass, query,db_host)
-      %< --user=#{user} --password="#{pass}" --execute="#{query}" -h #{db_host}>
+    def self.make_db_query(user, pass, query)
+	Chef::Log.warn(%<*****Running MySQL query: mysql --user=#{user} --password="#{pass}" --execute="#{query}" --socket=/var/run/mysql-default/mysqld.sock *****>)
+      %< --user=#{user} --password="#{pass}" --execute="#{query}" --socket=/var/run/mysql-default/mysqld.sock>
     end
   end
 end

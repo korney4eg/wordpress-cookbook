@@ -1,86 +1,58 @@
 #
-# Cookbook Name:: wordpress
-# Recipe:: database
-# Author:: Lucas Hansen (<lucash@opscode.com>)
-# Author:: Julian C. Dunn (<jdunn@getchef.com>)
+# Cookbook Name:: separate-db
+# Recipe:: default
 #
-# Copyright (C) 2013, Chef Software, Inc.
+# Copyright 2015, YOUR_COMPANY_NAME
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# All rights reserved - Do Not Redistribute
 #
 
-#include_recipe "mysql::client" unless platform_family?('windows') # No MySQL client on Windows
+include_recipe "openssl"
 
-  mysql_client 'default' do
-    action :create
-  end
-  
-mysql_service 'default' do
-  port '3306'
-  version '5.5'
-  bind_address '0.0.0.0'
-  data_dir '/wordpress_data'
-  initial_root_password node['mysql']['server_root_password']
-  Chef::Provider::MysqlService::Systemd
-  action [:create, :start]
+
+script "security setup" do
+  interpreter "bash"
+  user "root"
+  cwd "/tmp"
+  code <<-EOH
+    firewall-cmd --zone=public --add-port=3306/tcp
+    firewall-cmd --reload
+    setenforce permissive
+  EOH
 end
 
 
 
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
-::Chef::Recipe.send(:include, Wordpress::Helpers)
 
-node.set_unless['wordpress']['db']['pass'] = secure_password
-node.save unless Chef::Config[:solo]
+mysql_client 'default' do
+    action :create
+  end
+  
 
 db = node['wordpress']['db']
 
-#if is_local_host? db['host']
-  # include_recipe "mysql::server"
 
-  mysql_bin = (platform_family? 'windows') ? 'mysql.exe' : 'mysql'
-  user = "'#{db['user']}'@'#{db['host']}'"
-  create_user = %<CREATE USER #{user} IDENTIFIED BY '#{db['pass']}';>
-  user_exists = %<SELECT 1 FROM mysql.user WHERE user = '#{db['user']}';>
-  create_db = %<CREATE DATABASE #{db['name']};>
+  mysql_bin = 'mysql'
+  user = "'#{db['user']}'"
+
+  user_exists_remote = %<SELECT 1 FROM mysql.user WHERE user = '#{db['user']}'@'%';>
   db_exists = %<SHOW DATABASES LIKE '#{db['name']}';>
-  grant_privileges = %<GRANT ALL PRIVILEGES ON #{db['name']}.* TO #{user};>
-  privileges_exist = %<SHOW GRANTS FOR for #{user}@'%';>
-  flush_privileges = %<FLUSH PRIVILEGES;>
 
-  execute "Create WordPress MySQL User" do
-    action :run
-    command "#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], create_user)}"
-    only_if { `#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], user_exists)}`.empty? }
-  end
 
-  execute "Grant WordPress MySQL Privileges" do
-    action :run
-    command "#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], grant_privileges)}"
-    Chef::Log.info("*****Running MySQL command: *****")
-    Chef::Log.info("#{command}")
-    only_if { `#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], privileges_exist)}`.empty? }
-    notifies :run, "execute[Flush MySQL Privileges]"
-  end
+db_exists_res=`#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'],db_exists,db['host'])}`
+user_exists_remote_res=`#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], user_exists_remote,db['host'])}`
 
-  execute "Flush MySQL Privileges" do
-    action :nothing
-    command "#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], flush_privileges)}"
-  end
+#Chef::Log.warn("*****cmd: #{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], db_exists)} *****")
+# Chef::Log.warn("*****cmd_res: #{db_exists} *****")
 
-  execute "Create WordPress Database" do
-    action :run
-    command "#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], create_db)}"
-    only_if { `#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], db_exists)}`.empty? }
-  end
-#end
+if (!db_exists_res)
+  Chef::Log.err("***** DB not found! SQL query result: #{db_exists_res}; Query: #{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], db_exists,db['host'])}  *****")
+end
+
+if (!user_exists_remote)
+  Chef::Log.err("***** DB USER not found! SQL query result: #{user_exists_remote_res}; Query: #{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], user_exists_remote,db['host'])}  *****")
+end
+
+
+
+
