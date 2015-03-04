@@ -17,16 +17,35 @@
 # limitations under the License.
 #
 
+# install setroubleshoot
+
+
+
+
 include_recipe "php"
 
 # On Windows PHP comes with the MySQL Module and we use IIS on Windows
-unless platform? "windows"
-  include_recipe "php::module_mysql"
-  include_recipe "apache2"
-  include_recipe "apache2::mod_php5"
+
+include_recipe "php::module_mysql"
+include_recipe "apache2"
+include_recipe "apache2::mod_php5"
+include_recipe "apache2::mod_ssl"
+include_recipe "openssl"
+include_recipe "wordpress::database"
+include_recipe "wordpress::wp_cli"
+include_recipe "wordpress::hosts"
+include_recipe "wordpress::security"
+include_recipe "wordpress::host_info"
+include_recipe "wordpressnfs"
+
+Chef::Log.warn("*****Warning!!! SElinux will be disabled during setup *****")
+
+execute "selinux disable" do
+    command "setenforce permissive"    
 end
 
-include_recipe "wordpress::database"
+
+
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 node.set_unless['wordpress']['keys']['auth'] = secure_password
@@ -52,23 +71,19 @@ end
 
 archive = platform_family?('windows') ? 'wordpress.zip' : 'wordpress.tar.gz'
 
-if platform_family?('windows')
-  windows_zipfile node['wordpress']['parent_dir'] do
-    source node['wordpress']['url']
-    action :unzip
-    not_if {::File.exists?("#{node['wordpress']['dir']}\\index.php")}
-  end
-else
+
   remote_file "#{Chef::Config[:file_cache_path]}/#{archive}" do
     source node['wordpress']['url']
     action :create
+    not_if {::File.exists?("#{node['wordpress']['dir']}/index.php")}
   end
 
   execute "extract-wordpress" do
     command "tar xf #{Chef::Config[:file_cache_path]}/#{archive} -C #{node['wordpress']['parent_dir']}"
     creates "#{node['wordpress']['dir']}/index.php"
+    not_if {::File.exists?("#{node['wordpress']['dir']}/index.php")}
   end
-end
+
 
 template "#{node['wordpress']['dir']}/wp-config.php" do
   source 'wp-config.php.erb'
@@ -87,31 +102,45 @@ template "#{node['wordpress']['dir']}/wp-config.php" do
     :nonce_salt       => node['wordpress']['salt']['nonce'],
     :lang             => node['wordpress']['languages']['lang']
   )
+  
   action :create
+  not_if {File.exists?("#{node['wordpress']['dir']}/wp-config.php")}
 end
 
-if platform?('windows')
 
-  include_recipe 'iis::remove_default_site'
-
-  iis_pool 'WordpressPool' do
-    no_managed_code true
-    action :add
-  end
-
-  iis_site 'Wordpress' do
-    protocol :http
-    port 80
-    path node['wordpress']['dir']
-    application_pool 'WordpressPool'
-    action [:add,:start]
-  end
-else
   web_app "wordpress" do
     template "wordpress.conf.erb"
     docroot node['wordpress']['dir']
-    server_name node['fqdn']
+    server_name node['wordpress']['host_name']
     server_aliases node['wordpress']['server_aliases']
     enable true
   end
-end
+
+
+
+  execute "wp-cli" do
+      command "wp core install --allow-root && wp theme activate twentyfifteen --allow-root"
+      cwd node['wordpress']['parent_dir']
+  end
+
+  execute "wp-content permissions" do
+      command "chmod 777 wp-content -R"
+      cwd node['wordpress']['dir']
+  end
+
+  execute "restart httpd" do
+      command "systemctl restart httpd"
+  end
+
+
+
+
+ 
+
+
+
+
+
+
+
+

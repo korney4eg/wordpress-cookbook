@@ -1,0 +1,42 @@
+
+LoadModule ssl_module modules/mod_ssl.so
+
+
+<VirtualHost *:80>
+  ServerName <%= @params[:server_name] %>
+  Redirect permanent / https://<%= @params[:server_name] %>/
+</VirtualHost>
+
+<VirtualHost _default_:443>
+
+  ServerAdmin ops@example.com
+  ServerName <%= @params[:server_name] %>
+  DocumentRoot <%= @params[:docroot] %>
+    SSLEngine on
+    SSLCertificateFile <%= @params[:docroot] %>/certificates/test.com.cer
+    SSLCertificateKeyFile <%= @params[:docroot] %>/certificates/test.com.key
+    SSLCertificateChainFile <%= @params[:docroot] %>/certificates/root_ca.cer
+
+  <Directory />
+    Options FollowSymLinks
+    AllowOverride FileInfo Options
+    AllowOverride All
+  </Directory>
+
+  <Directory <%= @params[:docroot] %>>
+    Options Indexes FollowSymLinks MultiViews
+    AllowOverride FileInfo Options
+    AllowOverride All
+    Require all granted
+  </Directory>
+
+
+  LogLevel info
+  ErrorLog <%= node['apache']['log_dir'] %>/<%= @params[:name] %>-error.log
+  CustomLog <%= node['apache']['log_dir'] %>/<%= @params[:name] %>-access.log combined
+
+#  RewriteEngine On
+#  RewriteLog <%= node['apache']['log_dir'] %>/<%= @application_name %>-rewrite.log
+#  RewriteLogLevel 0
+
+</VirtualHost>

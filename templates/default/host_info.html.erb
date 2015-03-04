@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+  <html>
+    <body>
+
+      <h1>Server related information:</h1>
+      
+
+        <h2>Server platform:</h2>        
+          <p><%= @host_platform %> <%= @host_version %></p>
+
+
+        <h2>Server IP:</h2>        
+          <p><%= @host_ip %></p>
+          
+        <h2>Server FQDN:</h2>        
+          <p><%= @host_fqdn %></p>
+
+
+        <h2>Server related recipes:</h2>        
+          <p><%= node['recipes'] %></p>
+
+
+   </body>
+ </html>

@@ -23,13 +23,38 @@
 #
 
 # General settings
+=begin
+if (node['host_name']=~/'test1'/)
+  default['wordpress']['host_name']="site1.test.com"
+else
+  default['wordpress']['host_name']="site2.test.com"
+end
+=end
+
+
+default['wordpress']['host_name']=node['fqdn']
+Chef::Log.warn("*****Node Wordpress Name: #{default['wordpress']['host_name']} *****")
+
+
+
 default['wordpress']['version'] = 'latest'
+default['mysql']['server_root_password']='oasis'
+default['wordpress']['title']="test web site"
+default['wordpress']['admin_user']="wp_admin"
+default['wordpress']['admin_psw']="oasis"
+default['wordpress']['admin_email']="root@localhost.com"
+default['wordpress']['wp-cli_path']="/usr/local/bin/wp"
+default['wordpress']['wp-cli_url']="https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar"
+
+
 
 default['wordpress']['db']['name'] = "wordpressdb"
 default['wordpress']['db']['user'] = "wordpressuser"
-default['wordpress']['db']['pass'] = nil
+default['wordpress']['db']['pass'] = "bar"
 default['wordpress']['db']['prefix'] = 'wp_'
-default['wordpress']['db']['host'] = 'localhost'
+default['wordpress']['db']['host'] = '192.168.56.111'
+default['wordpress']['db']['version']="5.5"
+
 
 default['wordpress']['server_aliases'] = [node['fqdn']]
 
@@ -56,12 +81,12 @@ node['wordpress']['languages']['project_pathes'].each do |project,project_path|
     node['wordpress']['languages']['lang'] + '/default/export-translations?format=mo'
 end
 
-if platform_family?('windows')
-  default['wordpress']['parent_dir'] = "#{ENV['SystemDrive']}\\inetpub"
-  default['wordpress']['dir'] = "#{node['wordpress']['parent_dir']}\\wordpress"
-  default['wordpress']['url'] = "https://wordpress.org/wordpress-#{node['wordpress']['version']}.zip"
-else
-  default['wordpress']['parent_dir'] = '/var/www'
-  default['wordpress']['dir'] = "#{node['wordpress']['parent_dir']}/wordpress"
-  default['wordpress']['url'] = "https://wordpress.org/wordpress-#{node['wordpress']['version']}.tar.gz"
-end
+
+default['wordpress']['parent_dir'] = '/var/www'
+default['wordpress']['dir'] = "#{node['wordpress']['parent_dir']}/wordpress"
+default['wordpress']['url'] = "https://wordpress.org/wordpress-#{node['wordpress']['version']}.tar.gz"
+
+default['wordpressnfs']['mount_folder']="#{node['wordpress']['dir']}/wp-content/uploads"
+Chef::Log.warn("*****Node Wordpress mount NFS folder path: #{node['wordpressnfs']['mount_folder']}*****")
+
+

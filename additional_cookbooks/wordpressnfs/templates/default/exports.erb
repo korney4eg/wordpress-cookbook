@@ -1,0 +1,6 @@
+<% clients="" %>
+<% @nfs_clients_ar.each do |client| %>
+<% clients+=" #{client}" %>
+<% end %>
+<% settings=@shared_folder + clients %>
+<%= "#{settings}" %>
