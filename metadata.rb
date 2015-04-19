@@ -1,4 +1,4 @@
-name             "wordpress"
+name             "wordpress-cookbook"
 maintainer       "Barry Steinglass"
 maintainer_email "cookbooks@opscode.com"
 license          "Apache 2.0"
@@ -9,14 +9,16 @@ version          "1.3.3"
 recipe "WordPress", "Installs and configures WordPress LAMP stack on a single system"
 recipe "WordPress::languages", "Install WordPress translation files"
 
-%w{ php openssl }.each do |cb|
-  depends cb
-end
 
 depends "apache2", ">= 0.99.4"
 depends "mysql", ">= 1.0.5"
 depends "build-essential"
 depends "iis", ">= 1.6.2"
+depends "database"
+depends "mysql2_chef_gem"
+depends "wp-cli"
+depends "php"
+depends "openssl", ">= 4.0.0"
 
 %w{ debian ubuntu windows centos redhat scientific oracle }.each do |os|
   supports os

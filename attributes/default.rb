@@ -24,14 +24,20 @@
 
 # General settings
 default['wordpress']['version'] = 'latest'
+default['wordpress']['server_aliases'] = node['fqdn']
+default['wp-cli']['dir'] = '/tmp'
 
-default['wordpress']['db']['name'] = "wordpressdb"
-default['wordpress']['db']['user'] = "wordpressuser"
-default['wordpress']['db']['pass'] = nil
+default['wordpress']['db']['name'] = "wp"
+default['wordpress']['db']['user'] = "wp_user"
+default['wordpress']['db']['pass'] = "qwaszx@1"
 default['wordpress']['db']['prefix'] = 'wp_'
-default['wordpress']['db']['host'] = 'localhost'
+default['wordpress']['db']['host'] = '127.0.0.1'
+default['mysql']['server_root_password'] = 'qwaszx@1'
 
-default['wordpress']['server_aliases'] = [node['fqdn']]
+default['wordpress']['db']['server'] = '127.0.0.1'
+default['wordpress']['ip'] = '127.0.0.1'
+default['wordpress']['server_aliases'] = ['local']
+default['wordpress']['db']['theme'] = 'twentyfifteen'
 
 # Languages
 default['wordpress']['languages']['lang'] = ''

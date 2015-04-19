@@ -17,7 +17,10 @@
 # limitations under the License.
 #
 
+theme = node['wordpress']['db']['theme']
+
 include_recipe "php"
+#include_recipe "wordpress-cookbook::database"
 
 # On Windows PHP comes with the MySQL Module and we use IIS on Windows
 unless platform? "windows"
@@ -26,7 +29,7 @@ unless platform? "windows"
   include_recipe "apache2::mod_php5"
 end
 
-include_recipe "wordpress::database"
+include_recipe 'wp-cli'
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 node.set_unless['wordpress']['keys']['auth'] = secure_password
@@ -62,6 +65,7 @@ else
   remote_file "#{Chef::Config[:file_cache_path]}/#{archive}" do
     source node['wordpress']['url']
     action :create
+    not_if {::File.exists?("#{node['wordpress']['dir']}/index.php")}
   end
 
   execute "extract-wordpress" do
@@ -76,7 +80,7 @@ template "#{node['wordpress']['dir']}/wp-config.php" do
     :db_name          => node['wordpress']['db']['name'],
     :db_user          => node['wordpress']['db']['user'],
     :db_password      => node['wordpress']['db']['pass'],
-    :db_host          => node['wordpress']['db']['host'],
+    :db_server          => node['wordpress']['db']['server'],
     :auth_key         => node['wordpress']['keys']['auth'],
     :secure_auth_key  => node['wordpress']['keys']['secure_auth'],
     :logged_in_key    => node['wordpress']['keys']['logged_in'],
@@ -110,8 +114,28 @@ else
   web_app "wordpress" do
     template "wordpress.conf.erb"
     docroot node['wordpress']['dir']
-    server_name node['fqdn']
+    server_name 'local:80'
     server_aliases node['wordpress']['server_aliases']
     enable true
   end
+end
+
+
+wp_cli_command 'core install' do
+  args(
+     'path' => '/var/www/wordpress',
+     'allow-root' => '',
+     'url' => node['wordpress']['ip'],
+     'title' => 'Test-Site',
+     'admin_name' => 'admin',
+     'admin_email' => 'email@mail.mail',
+     'admin_password' => 'qwaszx@1'
+      )
+end
+
+wp_cli_command "theme activate #{theme}" do
+  args(
+  'path' => '/var/www/wordpress',
+  'allow-root' => ''
+  )
 end
