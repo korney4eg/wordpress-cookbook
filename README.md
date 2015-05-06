@@ -54,15 +54,16 @@ Attributes
 
 * `node['wordpress']['setup']['title']` - WordPress site title.
 * `node['wordpress']['setup']['admin_user']` - Administrator login name.
+* `node['wordpress']['setup']['admin_email']` - Administrator email address.
+* `node['wordpress']['setup']['url']` - WordPress site URL.
+
+### setup: admin password
 
 * `node['wordpress']['setup']['admin_password']['value']` - Administrator password. If 'nil', then will generate a random one unless 'from_databag' equals 'true'.
 * `node['wordpress']['setup']['admin_password']['from_databag']` - If 'true' then indicates that 'value' from above should be ignored, and further the value is obtained from data bag.
 * `node['wordpress']['setup']['admin_password']['databag']` - Data bag to get the value for password from.
 * `node['wordpress']['setup']['admin_password']['databag_item']` - Corresponding data bag item.
 * `node['wordpress']['setup']['admin_password']['databag_item_key']` - Corresponding data bag item key to get value from.
-
-* `node['wordpress']['setup']['admin_email']` - Administrator email address.
-* `node['wordpress']['setup']['url']` - WordPress site URL.
 
 ### theme
 
