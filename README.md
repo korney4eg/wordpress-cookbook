@@ -27,7 +27,7 @@ Recipes
 ==========
 
 * `wordpress::default` - Installs WordPress site.
-* `wordpress::wp-cli` - Installs wp-cli utility ([http://wp-cli.org/]).
+* `wordpress::wp-cli` - Installs wp-cli utility (http://wp-cli.org/).
 * `wordpress::setup` - Setups WordPress site.
 * `wordpress::theme` - Installs and activates theme from market or cookbook directory.
 
@@ -54,7 +54,13 @@ Attributes
 
 * `node['wordpress']['setup']['title']` - WordPress site title.
 * `node['wordpress']['setup']['admin_user']` - Administrator login name.
-* `node['wordpress']['setup']['admin_password']` - Administrator password. If 'nil', then will generate a random one
+
+* `node['wordpress']['setup']['admin_password']['value']` - Administrator password. If 'nil', then will generate a random one unless 'from_databag' equals 'true'.
+* `node['wordpress']['setup']['admin_password']['from_databag']` - If 'true' then indicates that 'value' from above should be ignored, and further the value is obtained from data bag.
+* `node['wordpress']['setup']['admin_password']['databag']` - Data bag to get the value for password from.
+* `node['wordpress']['setup']['admin_password']['databag_item']` - Corresponding data bag item.
+* `node['wordpress']['setup']['admin_password']['databag_item_key']` - Corresponding data bag item key to get value from.
+
 * `node['wordpress']['setup']['admin_email']` - Administrator email address.
 * `node['wordpress']['setup']['url']` - WordPress site URL.
 
@@ -62,8 +68,8 @@ Attributes
 
 Use `node['wordpress']['theme']['source_dir']` parameter to define theme sourcing method:
 
-* `public` to install from [https://wordpress.org/themes/]
-* `cookbook` to install from <cookbook-path>/files/default/<name>/
+* `public` to install from https://wordpress.org/themes/.
+* `cookbook` to install from `<cookbook-path>/files/default/<name>/`
 
 `node['wordpress']['theme']['name']` - Theme name at the market OR local directory name with theme files.
 
