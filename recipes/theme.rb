@@ -14,7 +14,7 @@ elsif node['wordpress']['theme']['source_dir'] == 'cookbook'
   if FileTest.directory?(`#{Chef::Config[:file_cache_path]}/wp --path='#{node['wordpress']['dir']}' theme path`.chomp + "/#{node['wordpress']['theme']['name']}")
     Chef::Log.warn("Theme directory for #{node['wordpress']['theme']['name']} already exists. Skipping install, and proceeding to activation.")
   else
-    remote_directory "#{node['wordpress']['dir']}/wp-content/themes/#{node['wordpress']['theme']['name']}" do
+    remote_directory `#{Chef::Config[:file_cache_path]}/wp --path='#{node['wordpress']['dir']}' theme path`.chomp + "/#{node['wordpress']['theme']['name']}" do
       source "#{node['wordpress']['theme']['name']}"
     end
   end
