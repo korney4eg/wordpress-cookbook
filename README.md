@@ -1,12 +1,7 @@
 Description
 ===========
 
-The Chef Wordpress cookbook installs and configures Wordpress according to the instructions at http://codex.wordpress.org/Installing_WordPress.
-
-Description
-===========
-
-This cookbook does not set up the WordPress blog. You will need to do this manually by going to http://hostname/wp-admin/install.php (this URL may be different if you change the attribute values).
+The Chef Wordpress cookbook installs and configures Wordpress according to the instructions at http://codex.wordpress.org/Installing_WordPress. You can also use it to install wp-cli and themes.
 
 Requirements
 ============
@@ -28,6 +23,14 @@ Cookbooks
 * windows
 * openssl (uses library to generate secure passwords)
 
+Recipes
+==========
+
+* `wordpress::default` - Installs WordPress site.
+* `wordpress::wp-cli` - Installs wp-cli utility (http://wp-cli.org/).
+* `wordpress::setup` - Setups WordPress site.
+* `wordpress::theme` - Installs and activates theme from market or cookbook directory.
+
 Attributes
 ==========
 
@@ -41,6 +44,35 @@ Attributes
 * `node['wordpress']['db']['user']` - Name of the WordPress MySQL user.
 * `node['wordpress']['db']['pass']` - Password of the WordPress MySQL user. By default, generated using openssl cookbook.
 * `node['wordpress']['db']['prefix']` - Prefix of all MySQL tables created by WordPress.
+
+### wp-cli
+
+* `node['wordpress']['wp-cli']['install_path']` - Path to wp-cli executable.
+* `node['wordpress']['wp-cli']['download_url']` - Download URL for wp-cli.
+
+### setup
+
+* `node['wordpress']['setup']['title']` - WordPress site title.
+* `node['wordpress']['setup']['admin_user']` - Administrator login name.
+* `node['wordpress']['setup']['admin_email']` - Administrator email address.
+* `node['wordpress']['setup']['url']` - WordPress site URL.
+
+### setup: admin password
+
+* `node['wordpress']['setup']['admin_password']['value']` - Administrator password. If 'nil', then will generate a random one unless 'from_databag' equals 'true'.
+* `node['wordpress']['setup']['admin_password']['from_databag']` - If 'true' then indicates that 'value' from above should be ignored, and further the value is obtained from data bag.
+* `node['wordpress']['setup']['admin_password']['databag']` - Data bag to get the value for password from.
+* `node['wordpress']['setup']['admin_password']['databag_item']` - Corresponding data bag item.
+* `node['wordpress']['setup']['admin_password']['databag_item_key']` - Corresponding data bag item key to get value from.
+
+### theme
+
+Use `node['wordpress']['theme']['source_dir']` parameter to define theme sourcing method:
+
+* `public` to install from https://wordpress.org/themes/.
+* `cookbook` to install from `<cookbook-path>/files/default/<name>/`
+
+`node['wordpress']['theme']['name']` - Theme name at the market OR local directory name with theme files.
 
 Usage
 =====
