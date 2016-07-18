@@ -14,9 +14,11 @@ recipe "WordPress::languages", "Install WordPress translation files"
 end
 
 depends "apache2", ">= 0.99.4"
-depends "mysql", ">= 1.0.5"
+depends "mysql", "~> 5.0"
 depends "build-essential"
 depends "iis", ">= 1.6.2"
+depends "mysql-chef_gem", "~> 0.0"
+depends "database", "= 2.3.1"
 
 %w{ debian ubuntu windows centos redhat scientific oracle }.each do |os|
   supports os
