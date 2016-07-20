@@ -20,7 +20,7 @@ platforms:
 suites:
   - name: default
     run_list:
-      - recipe[wordpress]
+      - recipe[wordpress-cookbook]
     attributes:
       mysql:
         server_root_password: "Please-Dont-Use-In-Production"
