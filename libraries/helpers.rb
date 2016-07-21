@@ -31,8 +31,12 @@ module Wordpress
       end
     end
 
-    def self.make_db_query(user, pass, query)
-      %< --user=#{user} --password="#{pass}" --execute="#{query}">
-    end
+   def self.make_db_query(user, pass, host, query)
+      %< --user=#{user} --password="#{pass}" --host="#{host}" --execute="#{query}">
+   end
+
   end
 end
+
+
+
