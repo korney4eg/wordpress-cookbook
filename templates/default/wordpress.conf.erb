@@ -6,8 +6,7 @@
   <Directory <%= @params[:docroot] %>>
     Options FollowSymLinks
     AllowOverride FileInfo Options
-    Order allow,deny
-    Allow from all
+    Require all granted
   </Directory>
 
   <Directory />
@@ -20,7 +19,5 @@
   CustomLog <%= node['apache']['log_dir'] %>/<%= @params[:name] %>-access.log combined
 
   RewriteEngine On
-  RewriteLog <%= node['apache']['log_dir'] %>/<%= @application_name %>-rewrite.log
-  RewriteLogLevel 0
 
 </VirtualHost>
