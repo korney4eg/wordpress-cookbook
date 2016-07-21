@@ -29,17 +29,16 @@ node.save unless Chef::Config[:solo]
 
 db = node['wordpress']['db']
 
-if is_local_host? db['host']
+#if is_local_host? db['host']
   include_recipe "mysql::server"
 
   mysql_bin = (platform_family? 'windows') ? 'mysql.exe' : 'mysql'
-  user = "'#{db['user']}'@'#{db['host']}'"
+  user = "'#{db['user']}'@'%'"
   create_user = %<CREATE USER #{user} IDENTIFIED BY '#{db['pass']}';>
   user_exists = %<SELECT 1 FROM mysql.user WHERE user = '#{db['user']}';>
   create_db = %<CREATE DATABASE #{db['name']};>
   db_exists = %<SHOW DATABASES LIKE '#{db['name']}';>
   grant_privileges = %<GRANT ALL PRIVILEGES ON #{db['name']}.* TO #{user};>
-  privileges_exist = %<SHOW GRANTS FOR for #{user}@'%';>
   flush_privileges = %<FLUSH PRIVILEGES;>
 
   execute "Create WordPress MySQL User" do
@@ -51,7 +50,6 @@ if is_local_host? db['host']
   execute "Grant WordPress MySQL Privileges" do
     action :run
     command "#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], grant_privileges)}"
-    only_if { `#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], privileges_exist)}`.empty? }
     notifies :run, "execute[Flush MySQL Privileges]"
   end
 
@@ -65,4 +63,4 @@ if is_local_host? db['host']
     command "#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], create_db)}"
     only_if { `#{mysql_bin} #{::Wordpress::Helpers.make_db_query("root", node['mysql']['server_root_password'], db_exists)}`.empty? }
   end
-end
+#end
