@@ -33,6 +33,10 @@ define('DB_CHARSET', 'utf8');
 /** The Database Collate type. Don't change this if in doubt. */
 define('DB_COLLATE', '');
 
+/** set site url and wp_home to loadbalancer ip address */
+define('WP_SITEURL','http://<%= @lb_host %>');
+define('WP_HOME','http://<%= @lb_host %>');
+
 /**#@+
  * Authentication Unique Keys and Salts.
  *
