@@ -29,11 +29,15 @@ node.save unless Chef::Config[:solo]
 
 db = node['wordpress']['db']
 
+### create subnet wildcard
+values = db['host'].split(".")
+subnet = "#{values[0]}.#{values[1]}.#{values[2]}.%"
+
 #if is_local_host? db['host']
   include_recipe "mysql::server"
 
   mysql_bin = (platform_family? 'windows') ? 'mysql.exe' : 'mysql'
-  user = "'#{db['user']}'@'%'"
+  user = "'#{db['user']}'@'#{subnet}'"
   create_user = %<CREATE USER #{user} IDENTIFIED BY '#{db['pass']}';>
   user_exists = %<SELECT 1 FROM mysql.user WHERE user = '#{db['user']}';>
   create_db = %<CREATE DATABASE #{db['name']};>
