@@ -23,8 +23,7 @@ end
 template "/etc/nginx/nginx.conf" do
   source 'nginx.conf.erb'
   variables(
-    :upstream1          => node['wordpress']['app1']['host'],
-    :upstream2          => node['wordpress']['app2']['host']
+    :ip_array          => node['wordpress']['ip_array']
   )
   action :create
 end

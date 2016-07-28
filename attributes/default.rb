@@ -31,8 +31,7 @@ default['wordpress']['db']['pass'] = "abc123"
 default['wordpress']['db']['prefix'] = 'wp_'
 default['wordpress']['db']['host'] = '192.168.50.4'
 default['wordpress']['lb']['host'] = '192.168.50.7'
-default['wordpress']['app1']['host'] = '192.168.50.5'
-default['wordpress']['app2']['host'] = '192.168.50.6'
+default['wordpress']['ip_array'] = nil
 
 default['wordpress']['server_aliases'] = [node['fqdn']]
 

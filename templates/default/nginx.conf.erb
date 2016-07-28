@@ -30,8 +30,9 @@ http {
 
     upstream wordpress {
             ip_hash;
-            server <%= @upstream1 %>;
-            server <%= @upstream2 %>;
+            <% @ip_array.each do |ip| %>
+            server <%= ip %>;
+            <% end %>
         }
 
         server {

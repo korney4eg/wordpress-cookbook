@@ -1,8 +1,6 @@
 lb:
-  ip_address: 192.168.50.17
+  ip_address: 192.168.50.10
 db:
-  ip_address: 192.168.50.14
-app1:
-  ip_address: 192.168.50.15
-app2:
-  ip_address: 192.168.50.16
+  ip_address: 192.168.50.11
+app_start:
+  ip_address: 192.168.50.12
