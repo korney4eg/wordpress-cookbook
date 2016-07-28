@@ -70,6 +70,11 @@ else
   end
 end
 
+#load encrypted data bag
+mysql_creds=Chef::EncryptedDataBagItem.load("passwords","wordpressuser")
+node.set['wordpress']['db']['pass'] = mysql_creds['password']
+
+
 template "#{node['wordpress']['dir']}/wp-config.php" do
   source 'wp-config.php.erb'
   variables(

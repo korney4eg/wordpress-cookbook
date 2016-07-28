@@ -5,10 +5,9 @@ settings = YAML.load_file 'vagrant_config.yml'
 
 Vagrant.configure(2) do |config|
   config.vm.box = "geerlingguy/centos6"
-    config.vm.synced_folder "../", "/cookbooks", type: "virtualbox"
-  
+  config.vm.synced_folder "../", "/cookbooks", type: "virtualbox"
+
    config.vm.define "lb" do |lb|
-      lb.vm.box = "geerlingguy/centos6"
       lb.vm.hostname = "wp-lb"
       lb.vm.network "private_network", ip: settings['lb']['ip_address']
       lb.vm.provision "chef_solo" do |chef|
@@ -28,18 +27,18 @@ Vagrant.configure(2) do |config|
    end
 
    config.vm.define "db" do |db|
-        db.vm.box = "geerlingguy/centos6"
         db.vm.hostname = "wp-db"
         db.vm.network "private_network", ip: settings['db']['ip_address']
 
         db.vm.provision "chef_solo" do |chef|
+               chef.data_bags_path = "data_bags"
+               chef.encrypted_data_bag_secret_key_path = "data_bag_key"
                chef.cookbooks_path = ".."
                chef.add_recipe "wordpress::database"
         end
    end
 
    config.vm.define "app1" do |app1|
-         app1.vm.box = "geerlingguy/centos6"
          app1.vm.hostname = "wp-app1"
          app1.vm.network "private_network", ip: settings['app1']['ip_address']
 
@@ -55,6 +54,8 @@ Vagrant.configure(2) do |config|
                       }
                }
                chef.cookbooks_path = ".."
+               chef.data_bags_path = "data_bags"
+               chef.encrypted_data_bag_secret_key_path = "data_bag_key"
                chef.add_recipe "wordpress"
 
 
@@ -62,7 +63,6 @@ Vagrant.configure(2) do |config|
    end
 
    config.vm.define "app2" do |app2|
-            app2.vm.box = "geerlingguy/centos6"
             app2.vm.hostname = "wp-app2"
             app2.vm.network "private_network", ip: settings['app2']['ip_address']
 
@@ -77,6 +77,8 @@ Vagrant.configure(2) do |config|
                             }
                          }
                   }
+                  chef.data_bags_path = "data_bags"
+                  chef.encrypted_data_bag_secret_key_path = "data_bag_key"
                   chef.cookbooks_path = ".."
                   chef.add_recipe "wordpress"
 

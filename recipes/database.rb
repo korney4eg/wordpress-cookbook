@@ -24,6 +24,10 @@ include_recipe "mysql::client" unless platform_family?('windows') # No MySQL cli
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 ::Chef::Recipe.send(:include, Wordpress::Helpers)
 
+#load encrypted data bag
+mysql_creds=Chef::EncryptedDataBagItem.load("passwords","wordpressuer")
+node.set['wordpress']['db']['pass'] = mysql_creds['password']
+
 node.set_unless['wordpress']['db']['pass'] = secure_password
 node.save unless Chef::Config[:solo]
 

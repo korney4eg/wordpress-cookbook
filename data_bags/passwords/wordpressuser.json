@@ -1,0 +1,9 @@
+{
+  "id": "wordpressuser",
+  "password": {
+    "encrypted_data": "jp8SjF8dCqMmNsN1uTZZKUe6/kOLmoceA3FNCe/uzu1APZ0iA4IL32+XU/hO\noqJ0\n",
+    "iv": "9gz1/+GFXFDgc3CYdDJB2w==\n",
+    "version": 1,
+    "cipher": "aes-256-cbc"
+  }
+}
