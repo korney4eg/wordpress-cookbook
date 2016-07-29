@@ -26,8 +26,6 @@ unless platform? "windows"
   include_recipe "apache2::mod_php5"
 end
 
-#include_recipe "wordpress::database"
-
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 node.set_unless['wordpress']['keys']['auth'] = secure_password
 node.set_unless['wordpress']['keys']['secure_auth'] = secure_password
@@ -39,16 +37,6 @@ node.set_unless['wordpress']['salt']['logged_in'] = secure_password
 node.set_unless['wordpress']['salt']['nonce'] = secure_password
 node.save unless Chef::Config[:solo]
 
-directory node['wordpress']['dir'] do
-  action :create
-  if platform_family?('windows')
-    rights :read, 'Everyone'
-  else
-    owner 'root'
-    group 'root'
-    mode  '00755'
-  end
-end
 
 archive = platform_family?('windows') ? 'wordpress.zip' : 'wordpress.tar.gz'
 
@@ -68,6 +56,12 @@ else
     command "tar xf #{Chef::Config[:file_cache_path]}/#{archive} -C #{node['wordpress']['parent_dir']}"
     creates "#{node['wordpress']['dir']}/index.php"
   end
+end
+
+execute "chown-wordpress" do
+  command "chown -R apache:apache /var/www/wordpress"
+  user "root"
+  action :run
 end
 
 #load encrypted data bag
