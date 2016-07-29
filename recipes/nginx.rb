@@ -26,6 +26,7 @@ template "/etc/nginx/nginx.conf" do
     :ip_array          => node['wordpress']['ip_array']
   )
   action :create
+  notifies :restart, 'service[nginx]'
 end
 
 service "nginx" do
