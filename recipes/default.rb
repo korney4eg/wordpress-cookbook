@@ -26,8 +26,6 @@ unless platform? "windows"
   include_recipe "apache2::mod_php5"
 end
 
-include_recipe "wordpress::database"
-
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 node.set_unless['wordpress']['keys']['auth'] = secure_password
 node.set_unless['wordpress']['keys']['secure_auth'] = secure_password
@@ -50,6 +48,19 @@ directory node['wordpress']['dir'] do
   end
 end
 
+#create wp-content dir and mount nfs share to it
+directory "#{node['wordpress']['dir']}/wp-content" do
+  action :create
+  owner 'root'
+  group 'root'
+  mode  '00755'
+end
+execute "Mount wp-config NFS share" do
+  action :run
+  command "mount #{node['wordpress']['db']['host']}:/wp-content -t nfs #{node['wordpress']['dir']}/wp-content"
+  not_if "mount | grep wp-content"
+end
+
 archive = platform_family?('windows') ? 'wordpress.zip' : 'wordpress.tar.gz'
 
 if platform_family?('windows')
@@ -70,6 +81,17 @@ else
   end
 end
 
+execute "chown-wordpress" do
+  command "chown -R apache:apache /var/www/wordpress"
+  user "root"
+  action :run
+end
+
+#load encrypted data bag
+mysql_creds=Chef::EncryptedDataBagItem.load("passwords","wordpressuser")
+node.set['wordpress']['db']['pass'] = mysql_creds['password']
+
+
 template "#{node['wordpress']['dir']}/wp-config.php" do
   source 'wp-config.php.erb'
   variables(
@@ -85,7 +107,8 @@ template "#{node['wordpress']['dir']}/wp-config.php" do
     :secure_auth_salt => node['wordpress']['salt']['secure_auth'],
     :logged_in_salt   => node['wordpress']['salt']['logged_in'],
     :nonce_salt       => node['wordpress']['salt']['nonce'],
-    :lang             => node['wordpress']['languages']['lang']
+    :lang             => node['wordpress']['languages']['lang'],
+    :lb_host          => node['wordpress']['lb']['host']
   )
   action :create
 end
@@ -114,4 +137,20 @@ else
     server_aliases node['wordpress']['server_aliases']
     enable true
   end
+end
+
+if node['wordpress']['app']['hostnames'].first == node['fqdn'] || node['wordpress']['app']['hostnames'].first == node['hostname']
+    #run only on first node
+    #install wp-cli and configure wordpress
+    include_recipe "wp-cli"
+    wp_cli_command 'core install' do
+          args(
+            'url' => "http://#{node['wordpress']['lb']['host']}",
+            'title' => node['wordpress']['config']['title'],
+            'admin_user' => node['wordpress']['config']['admin_user'],
+            'admin_password' => node['wordpress']['config']['admin_password'],
+            'admin_email' => node['wordpress']['config']['admin_email'],
+            'path' => '/var/www/wordpress'
+          )
+    end
 end
