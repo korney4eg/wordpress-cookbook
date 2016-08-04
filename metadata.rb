@@ -19,6 +19,8 @@ depends "build-essential"
 depends "iis", ">= 1.6.2"
 depends "mysql-chef_gem", "~> 0.0"
 depends "database", "= 2.3.1"
+depends "wp-cli", "~> 0.1.4"
+depends 'nfs', '~> 2.2.8'
 
 %w{ debian ubuntu windows centos redhat scientific oracle }.each do |os|
   supports os

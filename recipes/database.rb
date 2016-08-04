@@ -37,19 +37,26 @@ db = node['wordpress']['db']
 values = db['host'].split(".")
 subnet = "#{values[0]}.#{values[1]}.#{values[2]}.%"
 
+#nfs share for wp-content
+include_recipe "nfs::server"
+nfs_export "/exports" do
+  network '10.0.0.0/8'
+  writeable true
+  sync true
+  options ['no_root_squash']
+end
 
 include_recipe "mysql::server"
 
 mysql_bin = (platform_family? 'windows') ? 'mysql.exe' : 'mysql'
 create_db = %<CREATE DATABASE #{db['name']};>
 db_exists = %<SHOW DATABASES LIKE '#{db['name']}';>
-
 flush_privileges = %<FLUSH PRIVILEGES;>
 
 node['wordpress']['ip_array'].each do |host|
     user = "'#{db['user']}'@'#{host}'"
     create_user = %<CREATE USER #{user} IDENTIFIED BY '#{db['pass']}';>
-    user_exists = %<SELECT 1 FROM mysql.user WHERE user = '#{db['user']}'@'#{host}';>
+    user_exists = %<SELECT 1 FROM mysql.user WHERE user = #{user};>
     grant_privileges = %<GRANT ALL PRIVILEGES ON #{db['name']}.* TO #{user};>
 
     execute "Create WordPress MySQL User" do

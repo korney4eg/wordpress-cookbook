@@ -32,6 +32,11 @@ default['wordpress']['db']['prefix'] = 'wp_'
 default['wordpress']['db']['host'] = '192.168.50.4'
 default['wordpress']['lb']['host'] = '192.168.50.7'
 default['wordpress']['ip_array'] = nil
+default['wordpress']['app']['hostnames'] = nil
+default['wordpress']['config']['title'] = 'mysite'
+default['wordpress']['config']['admin_user'] = 'admin'
+default['wordpress']['config']['admin_password'] = "secretwp"
+default['wordpress']['config']['admin_email'] = 'admin@mysite.com'
 
 default['wordpress']['server_aliases'] = [node['fqdn']]
 
@@ -67,3 +72,4 @@ else
   default['wordpress']['dir'] = "#{node['wordpress']['parent_dir']}/wordpress"
   default['wordpress']['url'] = "https://wordpress.org/wordpress-#{node['wordpress']['version']}.tar.gz"
 end
+

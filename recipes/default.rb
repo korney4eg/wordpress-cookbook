@@ -37,6 +37,18 @@ node.set_unless['wordpress']['salt']['logged_in'] = secure_password
 node.set_unless['wordpress']['salt']['nonce'] = secure_password
 node.save unless Chef::Config[:solo]
 
+directory node['wordpress']['dir'] do
+  action :create
+  if platform_family?('windows')
+    rights :read, 'Everyone'
+  else
+    owner 'root'
+    group 'root'
+    mode  '00755'
+  end
+end
+
+#create wp-content dir and mount nfs share to it
 
 archive = platform_family?('windows') ? 'wordpress.zip' : 'wordpress.tar.gz'
 
@@ -114,4 +126,20 @@ else
     server_aliases node['wordpress']['server_aliases']
     enable true
   end
+end
+
+if node['wordpress']['app']['hostnames'].first == node['fqdn'] || node['wordpress']['app']['hostnames'].first == node['hostname']
+    #run only on first node
+    #install wp-cli and configure wordpress
+    include_recipe "wp-cli"
+    wp_cli_command 'core install' do
+          args(
+            'url' => "http://#{node['wordpress']['lb']['host']}",
+            'title' => node['wordpress']['config']['title'],
+            'admin_user' => node['wordpress']['config']['admin_user'],
+            'admin_password' => node['wordpress']['config']['admin_password'],
+            'admin_email' => node['wordpress']['config']['admin_email'],
+            'path' => '/var/www/wordpress'
+          )
+    end
 end
