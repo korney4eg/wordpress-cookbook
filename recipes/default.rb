@@ -49,6 +49,17 @@ directory node['wordpress']['dir'] do
 end
 
 #create wp-content dir and mount nfs share to it
+directory "#{node['wordpress']['dir']}/wp-content" do
+  action :create
+  owner 'root'
+  group 'root'
+  mode  '00755'
+end
+execute "Mount wp-config NFS share" do
+  action :run
+  command "mount #{node['wordpress']['db']['host']}:/wp-content -t nfs #{node['wordpress']['dir']}/wp-content"
+  not_if "mount | grep wp-content"
+end
 
 archive = platform_family?('windows') ? 'wordpress.zip' : 'wordpress.tar.gz'
 

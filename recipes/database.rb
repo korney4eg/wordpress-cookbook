@@ -32,15 +32,20 @@ node.set_unless['wordpress']['db']['pass'] = secure_password
 node.save unless Chef::Config[:solo]
 
 db = node['wordpress']['db']
+db_ip_split = db['host'].split(".")
 
-### create subnet wildcard
-values = db['host'].split(".")
-subnet = "#{values[0]}.#{values[1]}.#{values[2]}.%"
+#create dir for wp-content export
+directory '/wp-content' do
+  action :create
+  owner 'root'
+  group 'root'
+  mode  '00755'
+end
 
 #nfs share for wp-content
 include_recipe "nfs::server"
-nfs_export "/exports" do
-  network '10.0.0.0/8'
+nfs_export "/wp-content" do
+  network "#{db_ip_split[0]}.#{db_ip_split[1]}.#{db_ip_split[2]}.0/8"
   writeable true
   sync true
   options ['no_root_squash']
@@ -56,7 +61,7 @@ flush_privileges = %<FLUSH PRIVILEGES;>
 node['wordpress']['ip_array'].each do |host|
     user = "'#{db['user']}'@'#{host}'"
     create_user = %<CREATE USER #{user} IDENTIFIED BY '#{db['pass']}';>
-    user_exists = %<SELECT 1 FROM mysql.user WHERE user = #{user};>
+    user_exists = %<SELECT 1 FROM mysql.user WHERE user = '#{db['user']}' AND host = '#{host}';>
     grant_privileges = %<GRANT ALL PRIVILEGES ON #{db['name']}.* TO #{user};>
 
     execute "Create WordPress MySQL User" do
